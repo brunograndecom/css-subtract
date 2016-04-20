@@ -1,0 +1,51 @@
+@import "//fonts.googleapis.com/css?family=Montserrat:400,700";
+body {
+    margin: 0;
+    padding: 0;
+}
+h1 {
+    color: #aaa;
+    font-size: 2.2em;
+    margin-bottom: 10px;
+}
+p, a {
+    background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
+    font-size: 100%;
+    vertical-align: baseline;
+}
+footer {
+    background-color: #abcdef;
+}
+@font-face {
+    font-family: "r108r13n";
+    font-style: normal;
+    font-weight: 400;
+    src: url("r108r13n.eot?#iefix") format("embedded-opentype"), url("r108r13n.woff2") format("woff2"), url("r108r13n.woff") format("woff"), url("r108r13n.ttf") format("truetype"), url("r108r13n.svg#r108r13n") format("svg");
+}
+@-webkit-keyframes mymove {
+    from {top: 0px;}
+    to {top: 200px;}
+}
+@keyframes mymove {
+    from {top: 0px;}
+    to {top: 200px;}
+}
+@media screen and (max-width: 1023px) {
+    #hero {
+        height: 50%;
+    }
+    h1 {
+        color: #999;
+    }
+    p {
+        font-size: .7em;
+    }
+}
+@media screen and (max-width: 650px) {
+    body {
+        font-size: 12px !important;
+    }
+    .title {
+        text-align: left;
+    }
+}

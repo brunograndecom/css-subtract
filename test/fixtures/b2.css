@@ -1,0 +1,16 @@
+@media screen and (max-width: 1023px) {
+    #hero {
+        height: 50%;
+    }
+    h1 {
+        color: #999;
+    }
+}
+@media screen and (max-width: 650px) {
+    body {
+        font-size: 12px !important;
+    }
+    .title {
+        text-align: left;
+    }
+}

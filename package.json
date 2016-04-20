@@ -1,0 +1,48 @@
+{
+  "name": "grunt-css-subtract",
+  "description": "Grunt plugin to subtract a css file from another.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/brunograndecom/css-subtract",
+  "author": {
+    "name": "brn. - Barna Nagy",
+    "email": "bruno@brunogrande.com",
+    "url": "https://brunogrande.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:brunograndecom/css-subtract.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brunograndecom/css-subtract/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/brunograndecom/css-subtract/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "css-parse": "~1.6.0"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.9.2",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-nodeunit": "^0.3.3",
+    "grunt-contrib-cssmin": "^1.0.0",
+    "grunt": "~0.4.5"
+  },
+  "peerDependencies": {
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "css",
+    "diff",
+    "subtract"
+  ]
+}
