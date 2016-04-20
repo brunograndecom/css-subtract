@@ -52,7 +52,12 @@ A string value to set main `css` file. Other file(s) will be subtracted from thi
 ### Usage Examples
 
 #### Default Options
-In this example, the default options are used to do a subtraction. (`A - B = C`) So in that case A falls back to default=`./core.min.css`, B is `test/fixtures/b.css`, and C, the result will be `tmp/default_options/c.css`.
+In this example, the default options are used to do a subtraction. (`A - B = C`)
+
+So in that case
+* A falls back to default=`./core.min.css`,
+* B is `test/fixtures/b.css`,
+* and C, the result will be `tmp/default_options/c.css`.
 
 ```js
 grunt.initConfig({
@@ -66,7 +71,13 @@ grunt.initConfig({
 ```
 
 #### Custom Options
-In this example, the custom options are used to do a subtraction. (`A - B = C`) So in that case A will used the specified file: `test/fixtures/a.css`, B will be a concatenation of `test/fixtures/b1.css` and `test/fixtures/b2.css`, and C, the result will be saved to `tmp/custom_options/c.css`.
+In this example, the custom options are used to do a subtraction. (`A - B = C`)
+
+So in that case
+* A will be the specified file: `test/fixtures/a.css`,
+* B will be a concatenation of `test/fixtures/b1.css` and `test/fixtures/b2.css`,
+* and C, the result will be saved to `tmp/custom_options/c.css`.
+
 We've also set `writeJson` to `true`, so `json` outputs will be generated as: `tmp/custom_options/c-a.json`, `tmp/custom_options/c-b.json`, `tmp/custom_options/c-c.json`.
 
 ```js
@@ -88,7 +99,8 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## License
 Copyright (c) 2016 brn. - Barna Nagy
+
 Licensed under the MIT license.
 
 ## Release History
-* 2016-03-16   v0.1.0   First, initial release.
+* 2016-04-20   v0.1.0   First, initial release.
