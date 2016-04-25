@@ -273,34 +273,9 @@ module.exports = function(grunt) {
       }
 
       // Main
-
-      // @TODO delete this, uncomment next
-      var ssA = obj1.stylesheet;
-      var ssB = obj2.stylesheet;
-      var sA = explodeMultiSelectors(ssA);
-      var sB = explodeMultiSelectors(ssB);
+      var sA = explodeMultiSelectors(obj1.stylesheet);
+      var sB = explodeMultiSelectors(obj2.stylesheet);
       var sC = sA;
-
-      var outputA = {};
-          outputA.type = "stylesheet";
-          outputA.stylesheet = sA;
-      var outputB = {};
-          outputB.type = "stylesheet";
-          outputB.stylesheet = sB;
-      var outputC = {};
-          outputC.type = "stylesheet";
-          outputC.stylesheet = sC;
-      grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-ssa.json', JSON.stringify(outputA));
-      grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-ssa.json" created.');
-      grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-ssb.json', JSON.stringify(outputB));
-      grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-ssb.json" created.');
-      grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-ssc.json', JSON.stringify(outputC));
-      grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-ssc.json" created.');
-
-
-      // var sA = explodeMultiSelectors(obj1.stylesheet);
-      // var sB = explodeMultiSelectors(obj2.stylesheet);
-      // var sC = sA;
 
       for (var b in sB.rules) {
         switch (sB.rules[b].type) {
@@ -336,12 +311,13 @@ module.exports = function(grunt) {
 
       // Handle options - write c json if needed
       if (options.writeJson) {
-        grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-a.json', JSON.stringify(obj1));
-        grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-a.json" created.');
-        grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-b.json', JSON.stringify(obj2));
-        grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-b.json" created.');
-        grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-c.json', JSON.stringify(output));
-        grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-c.json" created.');
+        var dest_p = f.dest.substr(0,f.dest.indexOf("."));
+        grunt.file.write(dest_p + '-a.json', JSON.stringify(obj1));
+        grunt.log.writeln('File "' + dest_p + '-a.json" created.');
+        grunt.file.write(dest_p + '-b.json', JSON.stringify(obj2));
+        grunt.log.writeln('File "' + dest_p + '-b.json" created.');
+        grunt.file.write(dest_p + '-c.json', JSON.stringify(output));
+        grunt.log.writeln('File "' + dest_p + '-c.json" created.');
       }
 
       // Create valid css file from JSON.stringified json

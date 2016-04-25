@@ -1,1 +1,1 @@
-h1{margin-bottom:10px;}p,a{background:rgba(0, 0, 0, 0) none repeat scroll 0 0;font-size:100%;vertical-align:baseline;}@font-face{font-weight:400;}@keyframes mymove{from{top:0px;}to{top:200px;}}@media screen and (max-width: 1023px){p{font-size:.7em;}}
+@import url("//fonts.googleapis.com/css?family=Montserrat:400,700");h1{margin-bottom:10px;}@font-face{font-weight:400;}@-webkit-keyframes mymove{from{top:0px;}to{top:200px;}}p{background:rgba(0, 0, 0, 0) none repeat scroll 0 0;}a{background:rgba(0, 0, 0, 0) none repeat scroll 0 0;}
