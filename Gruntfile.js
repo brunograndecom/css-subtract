@@ -23,19 +23,6 @@ module.exports = function(grunt) {
       }
     },
 
-    // // @TODO: setup minification
-    // // Minify css files before and after
-    // cssmin: {
-    //   options: {
-    //
-    //   },
-    //   target: {
-    //     files: {
-    //       'output.css': ['foo.css', 'bar.css']
-    //     }
-    //   }
-    // },
-
     // Before generating any new files, remove any previously-created files.
     clean: {
       tests: ['tmp']
@@ -56,7 +43,6 @@ module.exports = function(grunt) {
           coreCss: 'test/fixtures/a.css'
         },
         files: {
-          // Test whether multiply files get concatenated.
           'tmp/custom_options/c.css': ['test/fixtures/b1.css', 'test/fixtures/b2.css']
         }
       }

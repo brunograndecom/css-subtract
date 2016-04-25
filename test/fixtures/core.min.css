@@ -1,4 +1,4 @@
-@import "//fonts.googleapis.com/css?family=Montserrat:400,700";
+@import url("//fonts.googleapis.com/css?family=Montserrat:400,700");
 body {
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@ footer {
     h1 {
         color: #999;
     }
-    p {
+    p, p:hover {
         font-size: .7em;
     }
 }

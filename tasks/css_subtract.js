@@ -66,7 +66,6 @@ module.exports = function(grunt) {
         return grunt.file.read(filepath);
       }).join('');
 
-      // Trick
       var data1 = parse(src1),
           data2 = parse(src2);
 
@@ -132,8 +131,76 @@ module.exports = function(grunt) {
         return stylesheetC;
       }
 
-      function createCss(json) {
+      function processNewRule(rule) {
+        // we want to separate them to new rule:
+        var outRules = [];
+        //    loop througt selectors
+        for(var selector in rule.selectors) {
+          // new rule with selectors[x] && declarations
+          var newRule              = {};
+              newRule.type         = "rule";
+              newRule.selectors    = [];
+              newRule.selectors[0] = rule.selectors[selector];
+              newRule.declarations = rule.declarations;
+          // push new rule to stylesheet.rules
+          outRules.push(newRule);
+        }
+        return outRules;
+      }
 
+      /*
+       * @param ssIn - stylesheet to loop through
+       * @return the new exploded stylesheet (ssOut)
+       */
+      function explodeMultiSelectors(ssIn){
+        var ssOut = ssIn;
+        for (var rule in ssIn.rules) {
+          if (ssIn.rules[rule].type == "rule") {
+            // type rule
+            if (ssIn.rules[rule].selectors.length > 1) {
+              // we have more then 1 selectors
+              // push separated rules to output stylesheet.rules
+              var t = processNewRule(ssIn.rules[rule]);
+              for (var tR in t) {
+                ssOut.rules.push(t[tR]);
+              }
+              // delete original (multi-selector) rule from rules
+              // get index of same rule in ssOut
+              var index = ssOut.rules.indexOf(ssIn.rules[rule]);
+              ssOut.rules.splice(index, 1);
+
+            }
+          }
+          else if (ssIn.rules[rule].type == "media") {
+            // type media
+            var mediaRule = ssIn.rules[rule];
+            for (var mRule in mediaRule.rules) {
+              if (mediaRule.rules[mRule].type == "rule") {
+                if (mediaRule.rules[mRule].selectors.length > 1) {
+                  // we have more then 1 selectors
+                  // delete original (multi-selector) rule from rules
+                  // get index of same rule in ssOut
+                  var mainIndex = ssOut.rules.indexOf(mediaRule);
+                  ssOut.rules.splice(mainIndex, 1);
+                  // push separated rules to output stylesheet.rules
+                  var t = processNewRule(mediaRule.rules[mRule]);
+                  for (var tR in t) {
+                    mediaRule.rules.push(t[tR]);
+                  }
+                  // delete original (multi-selector) rule from rules
+                  // get index of same rule in mediaRule
+                  var index = mediaRule.rules.indexOf(mediaRule.rules[mRule]);
+                  mediaRule.rules.splice(index, 1);
+                  ssOut.rules.push(mediaRule);
+                }
+              }
+            }
+          }
+        }
+        return ssOut;
+      }
+
+      function createCss(json) {
         var cssBuffer = "";
 
         for (var rule in json.rules) {
@@ -199,9 +266,34 @@ module.exports = function(grunt) {
       }
 
       // Main
-      var sA = obj1.stylesheet;
-      var sB = obj2.stylesheet;
+
+      // @TODO delete this, uncomment next
+      var ssA = obj1.stylesheet;
+      var ssB = obj2.stylesheet;
+      var sA = explodeMultiSelectors(ssA);
+      var sB = explodeMultiSelectors(ssB);
       var sC = sA;
+
+      var outputA = {};
+          outputA.type = "stylesheet";
+          outputA.stylesheet = sA;
+      var outputB = {};
+          outputB.type = "stylesheet";
+          outputB.stylesheet = sB;
+      var outputC = {};
+          outputC.type = "stylesheet";
+          outputC.stylesheet = sC;
+      grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-ssa.json', JSON.stringify(outputA));
+      grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-ssa.json" created.');
+      grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-ssb.json', JSON.stringify(outputB));
+      grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-ssb.json" created.');
+      grunt.file.write(f.dest.substr(0,f.dest.indexOf(".")) + '-ssc.json', JSON.stringify(outputC));
+      grunt.log.writeln('File "' + f.dest.substr(0,f.dest.indexOf(".")) + '-ssc.json" created.');
+
+
+      // var sA = explodeMultiSelectors(obj1.stylesheet);
+      // var sB = explodeMultiSelectors(obj2.stylesheet);
+      // var sC = sA;
 
       for (var b in sB.rules) {
         switch (sB.rules[b].type) {

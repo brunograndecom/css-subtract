@@ -5,6 +5,9 @@
     h1 {
         color: #999;
     }
+    p {
+        font-size: .7em;
+    }
 }
 @media screen and (max-width: 650px) {
     body {
