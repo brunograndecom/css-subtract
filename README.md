@@ -104,3 +104,4 @@ Licensed under the MIT license.
 
 ## Release History
 * 2016-04-20   v0.1.0   First, initial release.
+* 2016-04-25   v0.2.0   More accurate subtraction, works with merged selectors.
