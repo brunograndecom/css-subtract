@@ -87,8 +87,15 @@ module.exports = function(grunt) {
           if ((stylesheetA.rules[j].type == "keyframes") &&
               (stylesheetA.rules[j].name == stylesheetB.rules[i].name) &&
               (JSON.stringify(stylesheetA.rules[j].keyframes) == JSON.stringify(stylesheetB.rules[i].keyframes))) {
-                var index = stylesheetC.rules.indexOf(stylesheetA.rules[j]);
-                stylesheetC.rules.splice(index, 1);
+                if (stylesheetA.rules[j].hasOwnProperty("vendor") || stylesheetB.rules[i].hasOwnProperty("vendor")) {
+                  if (stylesheetA.rules[j].vendor == stylesheetB.rules[i].vendor) {
+                    var index = stylesheetC.rules.indexOf(stylesheetA.rules[j]);
+                    stylesheetC.rules.splice(index, 1);
+                  }
+                } else {
+                  var index = stylesheetC.rules.indexOf(stylesheetA.rules[j]);
+                  stylesheetC.rules.splice(index, 1);
+                }
           }
         }
         return stylesheetC;
