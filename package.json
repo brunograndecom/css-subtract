@@ -1,7 +1,7 @@
 {
   "name": "grunt-css-subtract",
   "description": "Grunt plugin to subtract a css file from another.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "homepage": "https://github.com/brunograndecom/css-subtract",
   "author": {
     "name": "brn. - Barna Nagy",
