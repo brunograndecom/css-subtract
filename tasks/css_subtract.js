@@ -1,4 +1,4 @@
-/*
+/**
  * grunt-css-subtract
  * https://github.com/brunograndecom/css-subtract
  *
@@ -27,7 +27,7 @@ module.exports = function(grunt) {
     var src1 = core.src
 
     .filter(function(filepath) {
-      // Warn on and remove invalid source files (if nonull was set).
+      // Warn on and remove invalid source files (if non was set).
       if (!grunt.file.exists(filepath)) {
         grunt.log.warn('Source file "' + filepath + '" not found.');
         return false;
@@ -50,7 +50,7 @@ module.exports = function(grunt) {
       var src2 = f.src
 
       .filter(function(filepath) {
-        // Warn on and remove invalid source files (if nonull was set).
+        // Warn on and remove invalid source files (if non was set).
         if (!grunt.file.exists(filepath)) {
           grunt.log.warn('Source file "' + filepath + '" not found.');
           return false;
@@ -72,141 +72,278 @@ module.exports = function(grunt) {
       var obj1 = JSON.parse(JSON.stringify(data1)),
           obj2 = JSON.parse(JSON.stringify(data2));
 
+      /**
+       * Diff import css declarations, if it's unique, add it to the result
+       * @param {Object} stylesheetA - Stylesheet A (C = A - B)
+       * @param {Object} stylesheetB - Stylesheet B (C = A - B)
+       * @param {Object} stylesheetC - Stylesheet C (C = A - B)
+       * @param {Number} i - pointer of Stylesheet A
+         * @returns {Object} - result stylesheet (C)
+         */
       function diffImport(stylesheetA, stylesheetB, stylesheetC, i) {
-        for (var j in stylesheetA.rules) {
-          if ((stylesheetA.rules[j].type == "import") && (stylesheetA.rules[j].import == stylesheetB.rules[i].import)) {
-            var index = stylesheetC.rules.indexOf(stylesheetA.rules[j]);
-            stylesheetC.rules.splice(index, 1);
+        var dup = false;
+        for (var j in stylesheetB.rules) {
+          if ((stylesheetB.rules[j].type == "import") && (stylesheetB.rules[j].import == stylesheetA.rules[i].import)) {
+            dup = true;
           }
+        }
+        if (!dup) {
+          stylesheetC.rules.push(stylesheetA.rules[i]);
         }
         return stylesheetC;
       }
 
+      /**
+       * Diff keyframe css declarations, if it's unique, add it to the result
+       * @param {Object} stylesheetA - Stylesheet A (C = A - B)
+       * @param {Object} stylesheetB - Stylesheet B (C = A - B)
+       * @param {Object} stylesheetC - Stylesheet C (C = A - B)
+       * @param {Number} i - pointer of Stylesheet A
+         * @returns {Object} - result stylesheet (C)
+         */
       function diffKeyframes(stylesheetA, stylesheetB, stylesheetC, i) {
-        for (var j in stylesheetA.rules) {
-          if ((stylesheetA.rules[j].type == "keyframes") &&
-              (stylesheetA.rules[j].name == stylesheetB.rules[i].name) &&
-              (JSON.stringify(stylesheetA.rules[j].keyframes) == JSON.stringify(stylesheetB.rules[i].keyframes))) {
-                if (stylesheetA.rules[j].hasOwnProperty("vendor") || stylesheetB.rules[i].hasOwnProperty("vendor")) {
-                  if (stylesheetA.rules[j].vendor == stylesheetB.rules[i].vendor) {
-                    var index = stylesheetC.rules.indexOf(stylesheetA.rules[j]);
-                    stylesheetC.rules.splice(index, 1);
+        var dup = false;
+        for (var j in stylesheetB.rules) {
+          if ((stylesheetB.rules[j].type == "keyframes") && (JSON.stringify(stylesheetB.rules[j]) === JSON.stringify(stylesheetA.rules[i]))) {
+            dup = true;
+          }
+        }
+        if (!dup) {
+          stylesheetC.rules.push(stylesheetA.rules[i]);
+        }
+        return stylesheetC;
+      }
+
+      /**
+       * Diff rule css declarations, if it's unique, add it to the result
+       * @param {Object} stylesheetA - Stylesheet A (C = A - B)
+       * @param {Object} stylesheetB - Stylesheet B (C = A - B)
+       * @param {Object} stylesheetC - Stylesheet C (C = A - B)
+       * @param {Number} i - pointer of Stylesheet A
+         * @returns {Object} - result stylesheet (C)
+         */
+      function diffRuleDeclarations(stylesheetA, stylesheetB, stylesheetC, i) {
+        var dup = false;
+        for (var j in stylesheetB.rules) {
+          if ((stylesheetB.rules[j].type == "rule") && (JSON.stringify(stylesheetB.rules[j]) === JSON.stringify(stylesheetA.rules[i]))) {
+            dup = true;
+          }
+        }
+        if (!dup) {
+          stylesheetC.rules.push(stylesheetA.rules[i]);
+        }
+        return stylesheetC;
+      }
+
+      /**
+       * Diff media css declarations, if it's unique, add it to the result
+       * @param {Object} stylesheetA - Stylesheet A (C = A - B)
+       * @param {Object} stylesheetB - Stylesheet B (C = A - B)
+       * @param {Object} stylesheetC - Stylesheet C (C = A - B)
+       * @param {Number} i - pointer of Stylesheet A
+       * @returns {Object} - result stylesheet (C)
+       */
+      function diffMedia(stylesheetA, stylesheetB, stylesheetC, i) {
+        var newRules       = {};
+            newRules.type  = "media";
+            newRules.media = stylesheetA.rules[i].media;
+            newRules.rules = [];
+
+        for (var j in stylesheetB.rules) {
+          if ((stylesheetB.rules[j].type == "media") && (stylesheetB.rules[j].media == stylesheetA.rules[i].media)) {
+            if (JSON.stringify(stylesheetA.rules[i]) !== JSON.stringify(stylesheetB.rules[j])) {
+
+              var mA = stylesheetA.rules[i];
+              var mB = stylesheetB.rules[j];
+              var mC = [];
+
+              for (var a in mA.rules) {
+
+                var dup = false;
+
+                for (var b in mB.rules) {
+                  if ((mB.rules[b].type == "rule") && (JSON.stringify(mB.rules[b]) === JSON.stringify(mA.rules[a]))) {
+                    dup = true;
                   }
-                } else {
-                  var index = stylesheetC.rules.indexOf(stylesheetA.rules[j]);
-                  stylesheetC.rules.splice(index, 1);
                 }
-          }
-        }
-        return stylesheetC;
-      }
-
-      function diffRuleDeclarations(stylesheetA, stylesheetB, stylesheetC, ia, ib) {
-        var indexOfTheRule = stylesheetC.rules.indexOf(stylesheetA.rules[ia]);
-
-        if (JSON.stringify(stylesheetA.rules[ia].declarations) == JSON.stringify(stylesheetB.rules[ib].declarations)) {
-          stylesheetC.rules.splice(indexOfTheRule, 1);
-        } else {
-          for (var db in stylesheetB.rules[ib].declarations) {
-            for (var da in stylesheetA.rules[ia].declarations) {
-              if (JSON.stringify(stylesheetA.rules[ia].declarations[da]) == JSON.stringify(stylesheetB.rules[ib].declarations[db])) {
-                var indexOfTheDeclaration = stylesheetC.rules[indexOfTheRule].declarations.indexOf(stylesheetA.rules[ia].declarations[da]);
-                stylesheetC.rules[indexOfTheRule].declarations.splice(indexOfTheDeclaration, 1);
+                if (!dup) {
+                  mC.push(mA.rules[a]);
+                }
               }
+              newRules.rules = mC;
             }
           }
         }
-        return stylesheetC;
-      }
-
-      function diffMedia(stylesheetA, stylesheetB, stylesheetC, ia, ib) {
-        var mA = stylesheetA.rules[ia];
-        var mB = stylesheetB.rules[ib];
-        var index = stylesheetC.rules.indexOf(stylesheetA.rules[ia]);
-
-        if (JSON.stringify(stylesheetA.rules[ia]) == JSON.stringify(stylesheetB.rules[ib])) {
-          stylesheetC.rules.splice(index, 1);
-        } else {
-          for (var b in mB.rules) {
-            for (var a in mA.rules) {
-              if (JSON.stringify(mA.rules[a].selectors) == JSON.stringify(mB.rules[b].selectors)) {
-                stylesheetC.rules[index] = diffRuleDeclarations(mA, mB, stylesheetC.rules[index], a, b);
-              }
-            }
-          }
+        if (newRules.rules.length) {
+          stylesheetC.rules.push(newRules);
         }
         return stylesheetC;
       }
 
-      function processNewRule(rule) {
-        // we want to separate them to new rule:
+
+      /**
+       * Separate a multi-declaration rule to single-declaration rules.
+       * @param {Object} rule - rule with more than 1 declarations
+         * @returns {Array} - array of single-declaration rules
+         */
+      function processDeclarations(rule) {
         var outRules = [];
-        //    loop througt selectors
-        for(var selector in rule.selectors) {
-          // new rule with selectors[x] && declarations
-          var newRule              = {};
-              newRule.type         = "rule";
-              newRule.selectors    = [];
-              newRule.selectors[0] = rule.selectors[selector];
-              newRule.declarations = rule.declarations;
-          // push new rule to stylesheet.rules
+        for (var declaration in rule.declarations) {
+
+          var newRule                 = {};
+              newRule.type            = "rule";
+              newRule.selectors       = rule.selectors;
+              newRule.declarations    = [];
+              newRule.declarations[0] = rule.declarations[declaration];
+
           outRules.push(newRule);
         }
         return outRules;
       }
 
-      /*
-       * @param ssIn - stylesheet to loop through
-       * @return the new exploded stylesheet (ssOut)
-       */
-      function explodeMultiSelectors(ssIn){
-        var ssOut = ssIn;
+      /**
+       * Separate a multi-declaration keyframe to single-declaration keyframes.
+       * @param {Object} keyframe - rule with more than 1 declarations
+         * @returns {Array} - array of single-declaration rules
+         */
+      function processKeyframeDeclarations(keyframe) {
+        var outKeyframes = [];
+        for (var declaration in keyframe.declarations) {
+
+          var newKeyframe                 = {};
+              newKeyframe.type            = "keyframe";
+              newKeyframe.values          = keyframe.values;
+              newKeyframe.declarations    = [];
+              newKeyframe.declarations[0] = keyframe.declarations[declaration];
+
+          outKeyframes.push(newKeyframe);
+        }
+        return outKeyframes;
+      }
+
+      /**
+       * Explode rules in the stylesheet to have only 1 declaration per rule.
+       * @param {Object} ssIn - stylesheet to explode
+         * @returns {Object} - the new exploded stylesheet
+         */
+      function explodeMultiDeclarations(ssIn) {
+        var ssOut = {}; ssOut.rules = [];
+
         for (var rule in ssIn.rules) {
           if (ssIn.rules[rule].type == "rule") {
-            // type rule
-            if (ssIn.rules[rule].selectors.length > 1) {
-              // we have more then 1 selectors
-              // push separated rules to output stylesheet.rules
-              var t = processNewRule(ssIn.rules[rule]);
+            if (ssIn.rules[rule].selectors[0] != "@font-face" && ssIn.rules[rule].declarations.length > 1) {
+              var t = processDeclarations(ssIn.rules[rule]);
               for (var tR in t) {
                 ssOut.rules.push(t[tR]);
               }
-              // delete original (multi-selector) rule from rules
-              // get index of same rule in ssOut
-              var index = ssOut.rules.indexOf(ssIn.rules[rule]);
-              ssOut.rules.splice(index, 1);
-
+            } else {
+              ssOut.rules.push(ssIn.rules[rule]);
             }
           }
           else if (ssIn.rules[rule].type == "media") {
-            // type media
             var mediaRule = ssIn.rules[rule];
             for (var mRule in mediaRule.rules) {
               if (mediaRule.rules[mRule].type == "rule") {
-                if (mediaRule.rules[mRule].selectors.length > 1) {
-                  // we have more then 1 selectors
-                  // delete original (multi-selector) rule from rules
-                  // get index of same rule in ssOut
-                  var mainIndex = ssOut.rules.indexOf(mediaRule);
-                  ssOut.rules.splice(mainIndex, 1);
-                  // push separated rules to output stylesheet.rules
-                  var t = processNewRule(mediaRule.rules[mRule]);
+                if (mediaRule.rules[mRule].declarations.length > 1) {
+                 var t = processDeclarations(mediaRule.rules[mRule]);
                   for (var tR in t) {
                     mediaRule.rules.push(t[tR]);
                   }
-                  // delete original (multi-selector) rule from rules
-                  // get index of same rule in mediaRule
-                  var index = mediaRule.rules.indexOf(mediaRule.rules[mRule]);
-                  mediaRule.rules.splice(index, 1);
-                  ssOut.rules.push(mediaRule);
-                }
+                 var mainIndex = mediaRule.rules.indexOf(mediaRule.rules[mRule]);
+                  mediaRule.rules.splice(mainIndex, 1);
+               }
               }
             }
+            ssOut.rules.push(mediaRule);
+          }
+          else if (ssIn.rules[rule].type == "keyframes") {
+            var keyframesRule = ssIn.rules[rule];
+            for (var kFrame in keyframesRule.keyframes) {
+              if (keyframesRule.keyframes[kFrame].declarations.length > 1) {
+                var t = processKeyframeDeclarations(keyframesRule.keyframes[kFrame]);
+                for (var tR in t) {
+                  keyframesRule.keyframes.push(t[tR]);
+                }
+                var mainIndex = keyframesRule.keyframes.indexOf(keyframesRule.keyframes[kFrame]);
+                keyframesRule.keyframes.splice(mainIndex, 1);
+              }
+            }
+            ssOut.rules.push(keyframesRule);
+          }
+          else if (ssIn.rules[rule].type == "import") {
+            ssOut.rules.push(ssIn.rules[rule]);
           }
         }
         return ssOut;
       }
 
+      /**
+       * Separate a multi-selector rule to single-selector rules.
+       * @param {Object} rule - rule with more than 1 selectors
+         * @returns {Array} - array of single-selector rules
+         */
+      function processSelectors(rule) {
+        var outRules = [];
+        for (var selector in rule.selectors) {
+
+          var newRule              = {};
+              newRule.type         = "rule";
+              newRule.selectors    = [];
+              newRule.selectors[0] = rule.selectors[selector];
+              newRule.declarations = rule.declarations;
+
+          outRules.push(newRule);
+        }
+        return outRules;
+      }
+
+      /**
+       * Explode rules in the stylesheet to have only 1 selector per rule.
+       * @param {Object} ssIn - stylesheet to explode
+         * @returns {Object} - the new exploded stylesheet
+         */
+      function explodeMultiSelectors(ssIn) {
+        var ssOut = {}; ssOut.rules = [];
+
+        for (var rule in ssIn.rules) {
+          if (ssIn.rules[rule].type == "rule") {
+            if (ssIn.rules[rule].selectors.length > 1) {
+              var t = processSelectors(ssIn.rules[rule]);
+              for (var tR in t) {
+                ssOut.rules.push(t[tR]);
+              }
+            } else {
+              ssOut.rules.push(ssIn.rules[rule]);
+            }
+          }
+          else if (ssIn.rules[rule].type == "media") {
+            var mediaRule = ssIn.rules[rule];
+            for (var mRule in mediaRule.rules) {
+              if (mediaRule.rules[mRule].type == "rule") {
+                if (mediaRule.rules[mRule].selectors.length > 1) {
+                  var t = processSelectors(mediaRule.rules[mRule]);
+                  for (var tR in t) {
+                    mediaRule.rules.push(t[tR]);
+                  }
+                  var mainIndex = mediaRule.rules.indexOf(mediaRule.rules[mRule]);
+                  mediaRule.rules.splice(mainIndex, 1);
+                }
+              }
+            }
+            ssOut.rules.push(mediaRule);
+          }
+          else {
+            ssOut.rules.push(ssIn.rules[rule]);
+          }
+        }
+        return ssOut;
+      }
+
+      /**
+       * Create css string from a json object.
+       * @param {Object} json - stylesheet json object
+         * @returns {string} - converted css stylesheet
+         */
       function createCss(json) {
         var cssBuffer = "";
 
@@ -273,34 +410,29 @@ module.exports = function(grunt) {
       }
 
       // Main
-      var sA = explodeMultiSelectors(obj1.stylesheet);
-      var sB = explodeMultiSelectors(obj2.stylesheet);
-      var sC = sA;
+      var stA = explodeMultiSelectors(obj1.stylesheet);
+      var stB = explodeMultiSelectors(obj2.stylesheet);
 
-      for (var b in sB.rules) {
-        switch (sB.rules[b].type) {
+      var sA = explodeMultiDeclarations(stA);
+      var sB = explodeMultiDeclarations(stB);
+      var sC = {}; sC.rules = [];
+
+      for (var a in sA.rules) {
+        switch (sA.rules[a].type) {
           case "import":
-            sC = diffImport(sA, sB, sC, b);
+            sC = diffImport(sA, sB, sC, a);
           break;
 
           case "keyframes":
-            sC = diffKeyframes(sA, sB, sC, b);
+            sC = diffKeyframes(sA, sB, sC, a);
           break;
 
           case "rule":
-            for (var a in sA.rules) {
-              if ((sA.rules[a].type == "rule") && (JSON.stringify(sA.rules[a].selectors) == JSON.stringify(sB.rules[b].selectors))) {
-                sC = diffRuleDeclarations(sA, sB, sC, a, b);
-              }
-            }
+            sC = diffRuleDeclarations(sA, sB, sC, a);
           break;
 
           case "media":
-            for (var a in sA.rules) {
-              if ((sA.rules[a].type == "media") && (sA.rules[a].media == sB.rules[b].media)) {
-                sC = diffMedia(sA, sB, sC, a, b);
-              }
-            }
+            sC = diffMedia(sA, sB, sC, a);
           break;
         }
       }
@@ -309,7 +441,7 @@ module.exports = function(grunt) {
           output.type = "stylesheet";
           output.stylesheet = sC;
 
-      // Handle options - write c json if needed
+      // Handle options - write jsons if needed
       if (options.writeJson) {
         var dest_p = f.dest.substr(0,f.dest.indexOf("."));
         grunt.file.write(dest_p + '-a.json', JSON.stringify(obj1));
